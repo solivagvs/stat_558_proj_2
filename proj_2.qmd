@@ -14,12 +14,77 @@ library(tidyverse)
 ```
 
 
-# Data import
-First we import the data and preview it
+# Data Import and Cleaning
+First we import the data, removing all rows containing missing values, and then preview it:
 
 ```{r data_import}
 football <- read_csv("data/2010-2025_scores.csv")
+football <- drop_na(football)
 
 football
 ```
 
+We create one more column indicating the victor in a given game.
+
+```{r game_winner}
+football <- add_column(football, "Winner" = "")
+
+for (i in 1:length(football$Winner)){
+  if (football$AwayScore[i] > football$HomeScore[i]){
+    football$Winner[i] = football$AwayTeam[i]
+  } else if (football$AwayScore[i] == football$HomeScore[i]){
+    football$Winner[i] = "TIE"
+  } else {
+    football$Winner[i] = football$HomeTeam[i]
+  }
+}
+```
+
+We will then add a `Date` column, combining the `GameDate` "prefix" and the `Season` "suffix" to the appropriate `date` type format. Note there are several entries with an `NA` designation and thus won't correctly parse.
+
+```{r date_convert}
+football <- football |>
+              mutate(GameDate = paste(GameDate, Season))
+
+football$GameDate <- mdy(football$GameDate)
+```
+
+We then need to adjust some of the `chr` columns to factors.
+
+```{r create_categorical_variables}
+football$Season <- as.factor(football$Season)
+football$Week <- as.factor(football$Week)
+football$GameStatus <- as.factor(football$GameStatus)
+football$GameSlot <- as.factor(football$GameSlot)
+football$AwayTeam <- as.factor(football$AwayTeam)
+football$HomeTeam <- as.factor(football$HomeTeam)
+football$Winner <- as.factor(football$Winner)
+
+football
+```
+
+# Exploratory Data Analysis
+## Victory Counts
+
+First, let's see a count of the total wins for this set of data, sorted in descending order.
+
+```{r win_counts}
+football |> group_by(Winner) |>
+  summarize(count = n()) |>
+  arrange(desc(count)) |>
+  print(n = Inf)
+```
+
+Tom Brady played with New England for ten years of this data set, viz. 2010 - 2019. I was never a fan, but the guy sure can football a football. Alas, poor Cardinals...
+
+There is a significant advantage for the Home Team, so now let us examine how many times the home team was the victor across the data set.
+
+```{r home_field_advantage}
+#| class-output: "wide-output" # fits results in scrollable sub-window
+
+football |> select(HomeTeam, Winner) |>
+  table() |>
+  print(n = Inf)
+```
+
+For an example, Green Bay won 122 of the games for which it was the home team, out of a total number of 207 victories, yielding a proportion of $\frac{122}{207} \approx 0.589$. Note in a binomial experiment with probability of success $p = 0.5$, the probability of at least 122 victories in 207 games is $P(X \geq 122) =$`pbinom(q = 122, size = 207, p = 0.5, lower.tail = FALSE)`$\approx 0.0041$, suggesting a significant home field advantage.
