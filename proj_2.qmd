@@ -11,15 +11,18 @@ For this section we will write "static" code that will be used to build an inter
 
 ```{r load_libraries}
 library(tidyverse)
+library(ggplot2)
 ```
 
 
 # Data Import and Cleaning
-First we import the data, removing all rows containing missing values, and then preview it:
+First we import the data, remove all rows containing missing values (which makes the `GameStatus` column redundant, as all scores were listed as `FINAL` or `NA`, so we will delete it). We will be analyzing scores by teams, so records where the home or away team are listed as `TBD` will also be expunged.
 
 ```{r data_import}
 football <- read_csv("data/2010-2025_scores.csv")
 football <- drop_na(football)
+football <- football |> select(-GameStatus)
+football <- football |> filter(HomeTeam != "TBD" & AwayTeam != "TBD")
 
 football
 ```
@@ -38,7 +41,7 @@ for (i in 1:length(football$HomeTeam)){
 }
 ```
 
-We create one more column indicating the victor in a given game.
+We create one more column indicating the victor in a given game. Ties will be calculated as `NA` and will be removed.
 
 ```{r game_winner}
 football <- add_column(football, "Winner" = "")
@@ -47,11 +50,13 @@ for (i in 1:length(football$Winner)){
   if (football$AwayScore[i] > football$HomeScore[i]){
     football$Winner[i] = football$AwayTeam[i]
   } else if (football$AwayScore[i] == football$HomeScore[i]){
-    football$Winner[i] = "TIE"
+    football$Winner[i] = NA
   } else {
     football$Winner[i] = football$HomeTeam[i]
   }
 }
+
+football <- drop_na(football)
 ```
 
 We will then add a `Date` column, combining the `GameDate` "prefix" and the `Season` "suffix" to the appropriate `date` type format. Note there are several entries with an `NA` designation and thus won't correctly parse.
@@ -68,7 +73,6 @@ We then need to adjust some of the `chr` columns to factors.
 ```{r create_categorical_variables}
 football$Season <- as.factor(football$Season)
 football$Week <- as.factor(football$Week)
-football$GameStatus <- as.factor(football$GameStatus)
 football$GameSlot <- as.factor(football$GameSlot)
 football$AwayTeam <- as.factor(football$AwayTeam)
 football$HomeTeam <- as.factor(football$HomeTeam)
@@ -110,7 +114,29 @@ football |> select(HomeTeam, Winner) |>
   print(n = Inf)
 ```
 
-For an example, Green Bay won $W = 122$ of the games for which it was the home team, out of a total number of $H = 168$ home games, yielding a proportion of $P(W | H) = \frac{122}{168} \approx 0.7262$. Note in a binomial experiment with probability of success $p = 0.5$, the probability of at least $W = 122$ victories in $n = 168$ games is $P(X \geq 122) =$`pbinom(q = 122, size = 168, p = 0.5, lower.tail = FALSE)`$\approx$`7.227e-10`, suggesting a significant home field advantage.
+For an example, Green Bay won $W = 122$ of the games for which it was *also* the home team, out of a total number of $H = 166$ home games, yielding a proportion of $P(W | H) = \frac{122}{166} \approx 0.7349$. Note in a binomial experiment with probability of success $p = 0.5$, the probability of at least $W = 122$ victories in $n = 166$ games is $P(X \geq 122) =$`pbinom(q = 122, size = 166, p = 0.5, lower.tail = FALSE)`$\approx$`1.9916e-10`, suggesting a significant home field advantage.
+
+For later, let's also examine, by team, the number of wins they have had as the home team. (This is just the "diagonals" of the previous contingency table.)
+
+```{r home_win_counts}
+home_winner_counts <- football |>
+  group_by(HomeTeam)|>
+  summarize(count = sum(HomeTeam == Winner))
+```
+
+And finally, let's compute the total number of games played by each team across all the seasons.
+
+```{r total_counts}
+away_counts <- football |> group_by(AwayTeam) |>
+  summarize(count = n())
+
+total_game_counts <- data.frame(Team = away_counts[[1]],
+                                count = away_counts[[2]] +
+                                  home_counts[[2]])
+
+rm(away_counts)
+```
+
 
 ### Quantitative Analyses: Scores
 Let's explore the home and away scores, overall.
@@ -154,7 +180,7 @@ There does appear to be a uniform distribution among these scores.
 
 2. Let's now examine the frequency of the games by day of the week.
 
-```{r game_day}
+```{r game_day_of_week}
 ggplot(data = football, mapping = aes(x = GameSlot)) +
   geom_bar() +
   labs(x = "Day/Time Slot", y = "Count",
@@ -162,20 +188,31 @@ ggplot(data = football, mapping = aes(x = GameSlot)) +
        subtitle = "(2010 - 2025)")
 ```
 
-Not surprisingly, Sunday dominates, followed (distantly) by Saturday and Thursday, respectively.
+Not surprisingly, Sunday dominates, followed (distantly) by Saturday and Thursday, respectively. I was not aware so few Tuesday games existed.
 
-3. 
+3. Let us now focus on looking at individual teams' statistics.
 
-```{r}
+First we make a data frame recording each team, the number of home games, wins, wins at home, and total games played.
+
+```{r stats_by_team}
 team_win_home <- data.frame(Team = as.character(home_counts[[1]]),
-                            Wins = simplify(winner_counts[winner_counts$Winner != "TIE", 2]),
+                            Wins = winner_counts[[2]],
                             HomeGames = home_counts[[2]],
+                            HomeWinGames = home_winner_counts[[2]],
+                            TotalGames = total_game_counts[[2]],
                             row.names = NULL)
 
-ggplot(data = football,
-       mapping = aes(x = team_win_home$Wins,
-                     y = team_win_home$Team)) +
-  geom_bar()
+team_win_home <- as_tibble(team_win_home)
+```
+
+We might try to compare the overall number of wins by team. Las Vegas is a "new" team, from the Oakland team in 2020, and so its numbers aren't as "robust" as others. So instead we examine a win-to-total ratio and use a line at $y = 0.5$ as a metric for overall success or failure.
+
+```{r win_to_total_ratio}
+ggplot(data = team_win_home,
+       mapping = aes(x = Team,
+                     y = Wins/TotalGames)) +
+  geom_col(position = "stack", stat = "identity") +
+  geom_abline(aes(intercept = 0.5, slope = 0))
 ```
 
 

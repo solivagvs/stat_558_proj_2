@@ -1,5 +1,6 @@
 library(shiny)
 library(tidyverse)
+library(DT)
 
 source("helper.R")
 
@@ -15,7 +16,7 @@ ui <- fluidPage(
             selectizeInput(
                 inputId = "home_team",
                 label = "Choose home team(s):",
-                choices = c("All", team_names),
+                choices = team_names,
                 multiple = TRUE
             ),
             
@@ -23,7 +24,7 @@ ui <- fluidPage(
             selectizeInput(
                 inputId = "away_team",
                 label = "Choose away team(s):",
-                choices = c("All", team_names),
+                choices = team_names,
                 multiple = TRUE
             ),
             
@@ -54,7 +55,7 @@ ui <- fluidPage(
         ),
 
         mainPanel(
-           textOutput("game_list")
+           DT::DTOutput("game_list")
         )
     )
 )
@@ -62,6 +63,12 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
 
+    football_subset <- reactive({
+        req(input$home_team | input$away_team)
+        filter((HomeTeam %in% input$home_team) &
+                   (AwayTeam %in% input$away_team))
+    })
+    
     output$game_list <- renderText({
         football |> filter(
             (HomeTeam %in% input$home_team) &
