@@ -24,6 +24,20 @@ football <- drop_na(football)
 football
 ```
 
+Within the data, Jacksonville was abbreviated `JAC` until 2013, when it was voted to change their abbreviation to the current `JAX`. Since this is the same team, we will change all the `JAC` abbreviations to `JAX`.
+
+```{r relabel_JAC}
+for (i in 1:length(football$HomeTeam)){
+  if (football$HomeTeam[i] == "JAC"){
+    football$HomeTeam[i] <- "JAX"
+  }
+  
+  if (football$AwayTeam[i] == "JAC"){
+    football$AwayTeam[i] <- "JAX"
+  }
+}
+```
+
 We create one more column indicating the victor in a given game.
 
 ```{r game_winner}
@@ -64,20 +78,30 @@ football
 ```
 
 # Exploratory Data Analysis
-## Qualitative Analyses: Victory Counts
+## Numeric
+### Qualitative Analyses: Victory Counts
 
 First, let's see a count of the total wins for this set of data, sorted in descending order.
 
 ```{r win_counts}
-football |> group_by(Winner) |>
-  summarize(count = n()) |>
-  arrange(desc(count)) |>
-  print(n = Inf)
+winner_counts <- football |> group_by(Winner) |>
+                   summarize(count = n())
+
+print(winner_counts, n = Inf)
 ```
 
 Tom Brady played with New England for ten years of this data set, viz. 2010 - 2019. I was never a fan, but the guy sure can football a football. Alas, poor Cardinals...
 
-There is a significant advantage for the Home Team, so now let us examine how many times the home team was the victor across the data set.
+Next, let us examine a count of the number of times a team was the home team.
+
+```{r home_team_counts}
+home_counts <- football |> group_by(HomeTeam) |>
+                 summarize(count = n())
+
+print(home_counts, n = Inf)
+```
+
+There has been shown to be a significant advantage for the Home Team, so now let us examine how many times the home team was the victor across the data set.
 
 ```{r home_field_advantage}
 football |> select(HomeTeam, Winner) |>
@@ -88,7 +112,7 @@ football |> select(HomeTeam, Winner) |>
 
 For an example, Green Bay won $W = 122$ of the games for which it was the home team, out of a total number of $H = 168$ home games, yielding a proportion of $P(W | H) = \frac{122}{168} \approx 0.7262$. Note in a binomial experiment with probability of success $p = 0.5$, the probability of at least $W = 122$ victories in $n = 168$ games is $P(X \geq 122) =$`pbinom(q = 122, size = 168, p = 0.5, lower.tail = FALSE)`$\approx$`7.227e-10`, suggesting a significant home field advantage.
 
-## Quantitative Analyses
+### Quantitative Analyses: Scores
 Let's explore the home and away scores, overall.
 
 ```{r score_summaries}
@@ -113,4 +137,50 @@ football |> group_by("Team" = Winner) |>
   print(n = Inf)
 ```
 
-For the most part, many of the medians are close to the means, suggesting symmetric distributions.
+For the most part, many of the medians are close to the means, suggesting symmetric distributions. It is also interesting to note the similarity among the teams themselves, which ostensibly suggests across these seasons the teams are equally matched.
+
+## Graphical
+1. Let's first compare the home scores against the away scores.
+
+```{r home_vs_away_scores}
+ggplot(data = football, mapping = aes(x = HomeScore, y = AwayScore)) +
+  geom_point(position = "jitter") +
+  labs(x = "Home Score", y = "Away Score",
+       title = "Home vs. Away Scores for NFL",
+       subtitle = "(2010 - 2025)")
+```
+
+There does appear to be a uniform distribution among these scores.
+
+2. Let's now examine the frequency of the games by day of the week.
+
+```{r game_day}
+ggplot(data = football, mapping = aes(x = GameSlot)) +
+  geom_bar() +
+  labs(x = "Day/Time Slot", y = "Count",
+       title = "Number of NFL Games by Day/Time",
+       subtitle = "(2010 - 2025)")
+```
+
+Not surprisingly, Sunday dominates, followed (distantly) by Saturday and Thursday, respectively.
+
+3. 
+
+```{r}
+team_win_home <- data.frame(Team = as.character(home_counts[[1]]),
+                            Wins = simplify(winner_counts[winner_counts$Winner != "TIE", 2]),
+                            HomeGames = home_counts[[2]],
+                            row.names = NULL)
+
+ggplot(data = football,
+       mapping = aes(x = team_win_home$Wins,
+                     y = team_win_home$Team)) +
+  geom_bar()
+```
+
+
+4. 
+
+5. 
+
+6. 
