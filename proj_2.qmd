@@ -64,7 +64,7 @@ football
 ```
 
 # Exploratory Data Analysis
-## Victory Counts
+## Qualitative Analyses: Victory Counts
 
 First, let's see a count of the total wins for this set of data, sorted in descending order.
 
@@ -80,11 +80,37 @@ Tom Brady played with New England for ten years of this data set, viz. 2010 - 20
 There is a significant advantage for the Home Team, so now let us examine how many times the home team was the victor across the data set.
 
 ```{r home_field_advantage}
-#| class-output: "wide-output" # fits results in scrollable sub-window
-
 football |> select(HomeTeam, Winner) |>
   table() |>
+  addmargins() |>
   print(n = Inf)
 ```
 
-For an example, Green Bay won 122 of the games for which it was the home team, out of a total number of 207 victories, yielding a proportion of $\frac{122}{207} \approx 0.589$. Note in a binomial experiment with probability of success $p = 0.5$, the probability of at least 122 victories in 207 games is $P(X \geq 122) =$`pbinom(q = 122, size = 207, p = 0.5, lower.tail = FALSE)`$\approx 0.0041$, suggesting a significant home field advantage.
+For an example, Green Bay won $W = 122$ of the games for which it was the home team, out of a total number of $H = 168$ home games, yielding a proportion of $P(W | H) = \frac{122}{168} \approx 0.7262$. Note in a binomial experiment with probability of success $p = 0.5$, the probability of at least $W = 122$ victories in $n = 168$ games is $P(X \geq 122) =$`pbinom(q = 122, size = 168, p = 0.5, lower.tail = FALSE)`$\approx$`7.227e-10`, suggesting a significant home field advantage.
+
+## Quantitative Analyses
+Let's explore the home and away scores, overall.
+
+```{r score_summaries}
+summary(football$HomeScore)
+summary(football$AwayScore)
+```
+
+We could, of course, also group by each team and look at each one's overall score summary irrespective of home or away status.
+
+```{r score_summaries_by_team}
+football |> group_by("Team" = Winner) |>
+  summarize(
+    min = min(c(HomeScore, AwayScore)),
+    quartile1 = quantile(c(HomeScore, AwayScore), 0.25),
+    median = median(c(HomeScore, AwayScore)),
+    quartile3 = quantile(c(HomeScore, AwayScore), 0.75),
+    max = max(c(HomeScore, AwayScore)),
+    IQR = quartile3 - quartile1,
+    mean = mean(c(HomeScore, AwayScore)),
+    sd = sd(c(HomeScore, AwayScore))
+  ) |>
+  print(n = Inf)
+```
+
+For the most part, many of the medians are close to the means, suggesting symmetric distributions.
