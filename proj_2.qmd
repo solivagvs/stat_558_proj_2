@@ -210,7 +210,7 @@ We might try to compare the overall number of wins by team. Las Vegas is a "new"
 ```{r win_to_total_ratio}
 ggplot(data = team_win_home,
        mapping = aes(x = Team,
-                     y = Wins/TotalGames)) +
+                     y = c(Wins, TotalGames))) +
   geom_col(position = "stack", stat = "identity") +
   geom_abline(aes(intercept = 0.5, slope = 0))
 ```
