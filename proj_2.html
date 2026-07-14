@@ -161,22 +161,13 @@ window.Quarto = {
 <h1>Data Import and Cleaning</h1>
 <p>First we import the data, remove all rows containing missing values (which makes the <code>GameStatus</code> column redundant, as all scores were listed as <code>FINAL</code> or <code>NA</code>, so we will delete it). We will be analyzing scores by teams, so records where the home or away team are listed as <code>TBD</code> will also be expunged.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/2010-2025_scores.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 5832 Columns: 9
-── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr (6): Week, GameStatus, GameSlot, GameDate, AwayTeam, HomeTeam
-dbl (3): Season, AwayScore, HomeScore
-
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> <span class="fu">drop_na</span>(football)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>GameStatus)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span> <span class="fu">filter</span>(HomeTeam <span class="sc">!=</span> <span class="st">"TBD"</span> <span class="sc">&amp;</span> AwayTeam <span class="sc">!=</span> <span class="st">"TBD"</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>football</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/2010-2025_scores.csv"</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> <span class="fu">drop_na</span>(football)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>GameStatus)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span> <span class="fu">filter</span>(HomeTeam <span class="sc">!=</span> <span class="st">"TBD"</span> <span class="sc">&amp;</span> AwayTeam <span class="sc">!=</span> <span class="st">"TBD"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>football</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5,256 × 8
    Season Week           GameSlot GameDate AwayTeam AwayScore HomeTeam HomeScore
@@ -196,49 +187,49 @@ dbl (3): Season, AwayScore, HomeScore
 </div>
 <p>Within the data, Jacksonville was abbreviated <code>JAC</code> until 2013, when it was voted to change their abbreviation to the current <code>JAX</code>. Since this is the same team, we will change all the <code>JAC</code> abbreviations to <code>JAX</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(football<span class="sc">$</span>HomeTeam)){</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (football<span class="sc">$</span>HomeTeam[i] <span class="sc">==</span> <span class="st">"JAC"</span>){</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    football<span class="sc">$</span>HomeTeam[i] <span class="ot">&lt;-</span> <span class="st">"JAX"</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (football<span class="sc">$</span>AwayTeam[i] <span class="sc">==</span> <span class="st">"JAC"</span>){</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    football<span class="sc">$</span>AwayTeam[i] <span class="ot">&lt;-</span> <span class="st">"JAX"</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(football<span class="sc">$</span>HomeTeam)){</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (football<span class="sc">$</span>HomeTeam[i] <span class="sc">==</span> <span class="st">"JAC"</span>){</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    football<span class="sc">$</span>HomeTeam[i] <span class="ot">&lt;-</span> <span class="st">"JAX"</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (football<span class="sc">$</span>AwayTeam[i] <span class="sc">==</span> <span class="st">"JAC"</span>){</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    football<span class="sc">$</span>AwayTeam[i] <span class="ot">&lt;-</span> <span class="st">"JAX"</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We create one more column indicating the victor in a given game. Ties will be calculated as <code>NA</code> and will be removed.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> <span class="fu">add_column</span>(football, <span class="st">"Winner"</span> <span class="ot">=</span> <span class="st">""</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(football<span class="sc">$</span>Winner)){</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (football<span class="sc">$</span>AwayScore[i] <span class="sc">&gt;</span> football<span class="sc">$</span>HomeScore[i]){</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    football<span class="sc">$</span>Winner[i] <span class="ot">=</span> football<span class="sc">$</span>AwayTeam[i]</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (football<span class="sc">$</span>AwayScore[i] <span class="sc">==</span> football<span class="sc">$</span>HomeScore[i]){</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    football<span class="sc">$</span>Winner[i] <span class="ot">=</span> <span class="cn">NA</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    football<span class="sc">$</span>Winner[i] <span class="ot">=</span> football<span class="sc">$</span>HomeTeam[i]</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> <span class="fu">drop_na</span>(football)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> <span class="fu">add_column</span>(football, <span class="st">"Winner"</span> <span class="ot">=</span> <span class="st">""</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(football<span class="sc">$</span>Winner)){</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (football<span class="sc">$</span>AwayScore[i] <span class="sc">&gt;</span> football<span class="sc">$</span>HomeScore[i]){</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    football<span class="sc">$</span>Winner[i] <span class="ot">=</span> football<span class="sc">$</span>AwayTeam[i]</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (football<span class="sc">$</span>AwayScore[i] <span class="sc">==</span> football<span class="sc">$</span>HomeScore[i]){</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    football<span class="sc">$</span>Winner[i] <span class="ot">=</span> <span class="cn">NA</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    football<span class="sc">$</span>Winner[i] <span class="ot">=</span> football<span class="sc">$</span>HomeTeam[i]</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> <span class="fu">drop_na</span>(football)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We will then add a <code>Date</code> column, combining the <code>GameDate</code> “prefix” and the <code>Season</code> “suffix” to the appropriate <code>date</code> type format. Note there are several entries with an <code>NA</code> designation and thus won’t correctly parse.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">GameDate =</span> <span class="fu">paste</span>(GameDate, Season))</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>GameDate <span class="ot">&lt;-</span> <span class="fu">mdy</span>(football<span class="sc">$</span>GameDate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">GameDate =</span> <span class="fu">paste</span>(GameDate, Season))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>GameDate <span class="ot">&lt;-</span> <span class="fu">mdy</span>(football<span class="sc">$</span>GameDate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We then need to adjust some of the <code>chr</code> columns to factors.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>Season <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(football<span class="sc">$</span>Season)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>Week <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(football<span class="sc">$</span>Week)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>GameSlot <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(football<span class="sc">$</span>GameSlot)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>AwayTeam <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(football<span class="sc">$</span>AwayTeam)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>HomeTeam <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(football<span class="sc">$</span>HomeTeam)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>Winner <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(football<span class="sc">$</span>Winner)</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>football</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>Season <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(football<span class="sc">$</span>Season)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>Week <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(football<span class="sc">$</span>Week)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>GameSlot <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(football<span class="sc">$</span>GameSlot)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>AwayTeam <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(football<span class="sc">$</span>AwayTeam)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>HomeTeam <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(football<span class="sc">$</span>HomeTeam)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>football<span class="sc">$</span>Winner <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(football<span class="sc">$</span>Winner)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>football</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5,234 × 9
    Season Week  GameSlot GameDate   AwayTeam AwayScore HomeTeam HomeScore Winner
@@ -265,10 +256,10 @@ dbl (3): Season, AwayScore, HomeScore
 <h3 class="anchored" data-anchor-id="qualitative-analyses-victory-counts">Qualitative Analyses: Victory Counts</h3>
 <p>First, let’s see a count of the total wins for this set of data, sorted in descending order.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>winner_counts <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span> <span class="fu">group_by</span>(Winner) <span class="sc">|&gt;</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">summarize</span>(<span class="at">count =</span> <span class="fu">n</span>())</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(winner_counts, <span class="at">n =</span> <span class="cn">Inf</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>winner_counts <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span> <span class="fu">group_by</span>(Winner) <span class="sc">|&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">summarize</span>(<span class="at">count =</span> <span class="fu">n</span>())</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(winner_counts, <span class="at">n =</span> <span class="cn">Inf</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 35 × 2
    Winner count
@@ -313,10 +304,10 @@ dbl (3): Season, AwayScore, HomeScore
 <p>Tom Brady played with New England for ten years of this data set, viz.&nbsp;2010 - 2019. I was never a fan, but the guy sure can football a football. Alas, poor Cardinals…</p>
 <p>Next, let us examine a count of the number of times a team was the home team.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>home_counts <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span> <span class="fu">group_by</span>(HomeTeam) <span class="sc">|&gt;</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">summarize</span>(<span class="at">count =</span> <span class="fu">n</span>())</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(home_counts, <span class="at">n =</span> <span class="cn">Inf</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>home_counts <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span> <span class="fu">group_by</span>(HomeTeam) <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">summarize</span>(<span class="at">count =</span> <span class="fu">n</span>())</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(home_counts, <span class="at">n =</span> <span class="cn">Inf</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 35 × 2
    HomeTeam count
@@ -360,10 +351,10 @@ dbl (3): Season, AwayScore, HomeScore
 </div>
 <p>There has been shown to be a significant advantage for the Home Team, so now let us examine how many times the home team was the victor across the data set.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>football <span class="sc">|&gt;</span> <span class="fu">select</span>(HomeTeam, Winner) <span class="sc">|&gt;</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">table</span>() <span class="sc">|&gt;</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addmargins</span>() <span class="sc">|&gt;</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="cn">Inf</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>football <span class="sc">|&gt;</span> <span class="fu">select</span>(HomeTeam, Winner) <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addmargins</span>() <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="cn">Inf</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        Winner
 HomeTeam  ARI  ATL  BAL  BUF  CAR  CHI  CIN  CLE  DAL  DEN  DET   GB  HOU  IND
@@ -484,32 +475,32 @@ HomeTeam   SD  SEA   SF  STL   TB  TEN  WAS  Sum
 <p>For an example, Green Bay won <span class="math inline">\(W = 122\)</span> of the games for which it was <em>also</em> the home team, out of a total number of <span class="math inline">\(H = 166\)</span> home games, yielding a proportion of <span class="math inline">\(P(W | H) = \frac{122}{166} \approx 0.7349\)</span>. Note in a binomial experiment with probability of success <span class="math inline">\(p = 0.5\)</span>, the probability of at least <span class="math inline">\(W = 122\)</span> victories in <span class="math inline">\(n = 166\)</span> games is <span class="math inline">\(P(X \geq 122) =\)</span><code>pbinom(q = 122, size = 166, p = 0.5, lower.tail = FALSE)</code><span class="math inline">\(\approx\)</span><code>1.9916e-10</code>, suggesting a significant home field advantage.</p>
 <p>For later, let’s also examine, by team, the number of wins they have had as the home team. (This is just the “diagonals” of the previous contingency table.)</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>home_winner_counts <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(HomeTeam)<span class="sc">|&gt;</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">count =</span> <span class="fu">sum</span>(HomeTeam <span class="sc">==</span> Winner))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>home_winner_counts <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(HomeTeam)<span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">count =</span> <span class="fu">sum</span>(HomeTeam <span class="sc">==</span> Winner))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>And finally, let’s compute the total number of games played by each team across all the seasons.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>away_counts <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span> <span class="fu">group_by</span>(AwayTeam) <span class="sc">|&gt;</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">count =</span> <span class="fu">n</span>())</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>total_game_counts <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Team =</span> away_counts[[<span class="dv">1</span>]],</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                                <span class="at">count =</span> away_counts[[<span class="dv">2</span>]] <span class="sc">+</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>                                  home_counts[[<span class="dv">2</span>]])</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(away_counts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>away_counts <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span> <span class="fu">group_by</span>(AwayTeam) <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">count =</span> <span class="fu">n</span>())</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>total_game_counts <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Team =</span> away_counts[[<span class="dv">1</span>]],</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                                <span class="at">count =</span> away_counts[[<span class="dv">2</span>]] <span class="sc">+</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>                                  home_counts[[<span class="dv">2</span>]])</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(away_counts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="quantitative-analyses-scores" class="level3">
 <h3 class="anchored" data-anchor-id="quantitative-analyses-scores">Quantitative Analyses: Scores</h3>
 <p>Let’s explore the home and away scores, overall.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(football<span class="sc">$</span>HomeScore)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(football<span class="sc">$</span>HomeScore)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
    0.00   16.00   23.00   23.16   30.00   70.00 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(football<span class="sc">$</span>AwayScore)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(football<span class="sc">$</span>AwayScore)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
    0.00   14.00   21.00   21.22   27.00   59.00 </code></pre>
@@ -517,18 +508,18 @@ HomeTeam   SD  SEA   SF  STL   TB  TEN  WAS  Sum
 </div>
 <p>We could, of course, also group by each team and look at each one’s overall score summary irrespective of home or away status.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>football <span class="sc">|&gt;</span> <span class="fu">group_by</span>(<span class="st">"Team"</span> <span class="ot">=</span> Winner) <span class="sc">|&gt;</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">min =</span> <span class="fu">min</span>(<span class="fu">c</span>(HomeScore, AwayScore)),</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">quartile1 =</span> <span class="fu">quantile</span>(<span class="fu">c</span>(HomeScore, AwayScore), <span class="fl">0.25</span>),</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> <span class="fu">median</span>(<span class="fu">c</span>(HomeScore, AwayScore)),</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">quartile3 =</span> <span class="fu">quantile</span>(<span class="fu">c</span>(HomeScore, AwayScore), <span class="fl">0.75</span>),</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">max =</span> <span class="fu">max</span>(<span class="fu">c</span>(HomeScore, AwayScore)),</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">IQR =</span> quartile3 <span class="sc">-</span> quartile1,</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean =</span> <span class="fu">mean</span>(<span class="fu">c</span>(HomeScore, AwayScore)),</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd =</span> <span class="fu">sd</span>(<span class="fu">c</span>(HomeScore, AwayScore))</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="cn">Inf</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>football <span class="sc">|&gt;</span> <span class="fu">group_by</span>(<span class="st">"Team"</span> <span class="ot">=</span> Winner) <span class="sc">|&gt;</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">min =</span> <span class="fu">min</span>(<span class="fu">c</span>(HomeScore, AwayScore)),</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">quartile1 =</span> <span class="fu">quantile</span>(<span class="fu">c</span>(HomeScore, AwayScore), <span class="fl">0.25</span>),</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> <span class="fu">median</span>(<span class="fu">c</span>(HomeScore, AwayScore)),</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">quartile3 =</span> <span class="fu">quantile</span>(<span class="fu">c</span>(HomeScore, AwayScore), <span class="fl">0.75</span>),</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">max =</span> <span class="fu">max</span>(<span class="fu">c</span>(HomeScore, AwayScore)),</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">IQR =</span> quartile3 <span class="sc">-</span> quartile1,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean =</span> <span class="fu">mean</span>(<span class="fu">c</span>(HomeScore, AwayScore)),</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd =</span> <span class="fu">sd</span>(<span class="fu">c</span>(HomeScore, AwayScore))</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="cn">Inf</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 35 × 9
    Team    min quartile1 median quartile3   max   IQR  mean    sd
@@ -579,11 +570,11 @@ HomeTeam   SD  SEA   SF  STL   TB  TEN  WAS  Sum
 <li>Let’s first compare the home scores against the away scores.</li>
 </ol>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> football, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> HomeScore, <span class="at">y =</span> AwayScore)) <span class="sc">+</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="st">"jitter"</span>) <span class="sc">+</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Home Score"</span>, <span class="at">y =</span> <span class="st">"Away Score"</span>,</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Home vs. Away Scores for NFL"</span>,</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"(2010 - 2025)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> football, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> HomeScore, <span class="at">y =</span> AwayScore)) <span class="sc">+</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="st">"jitter"</span>) <span class="sc">+</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Home Score"</span>, <span class="at">y =</span> <span class="st">"Away Score"</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Home vs. Away Scores for NFL"</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"(2010 - 2025)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -597,11 +588,11 @@ HomeTeam   SD  SEA   SF  STL   TB  TEN  WAS  Sum
 <li>Let’s now examine the frequency of the games by day of the week.</li>
 </ol>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> football, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> GameSlot)) <span class="sc">+</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Day/Time Slot"</span>, <span class="at">y =</span> <span class="st">"Count"</span>,</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Number of NFL Games by Day/Time"</span>,</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"(2010 - 2025)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> football, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> GameSlot)) <span class="sc">+</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Day/Time Slot"</span>, <span class="at">y =</span> <span class="st">"Count"</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Number of NFL Games by Day/Time"</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"(2010 - 2025)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -616,35 +607,33 @@ HomeTeam   SD  SEA   SF  STL   TB  TEN  WAS  Sum
 </ol>
 <p>First we make a data frame recording each team, the number of home games, wins, wins at home, and total games played.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>team_win_home <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Team =</span> <span class="fu">as.character</span>(home_counts[[<span class="dv">1</span>]]),</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>                            <span class="at">Wins =</span> winner_counts[[<span class="dv">2</span>]],</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">HomeGames =</span> home_counts[[<span class="dv">2</span>]],</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">HomeWinGames =</span> home_winner_counts[[<span class="dv">2</span>]],</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">TotalGames =</span> total_game_counts[[<span class="dv">2</span>]],</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">row.names =</span> <span class="cn">NULL</span>)</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>team_win_home <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(team_win_home)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>team_win_home <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Team =</span> <span class="fu">as.character</span>(home_counts[[<span class="dv">1</span>]]),</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                            <span class="at">Wins =</span> winner_counts[[<span class="dv">2</span>]],</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">HomeGames =</span> home_counts[[<span class="dv">2</span>]],</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">HomeWinGames =</span> home_winner_counts[[<span class="dv">2</span>]],</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">TotalGames =</span> total_game_counts[[<span class="dv">2</span>]],</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">row.names =</span> <span class="cn">NULL</span>)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>team_win_home <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(team_win_home)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>We might try to compare the overall number of wins by team. Las Vegas is a “new” team, from the Oakland team in 2020, and so its numbers aren’t as “robust” as others. So instead we examine a win-to-total ratio and use a line at <span class="math inline">\(y = 0.5\)</span> as a metric for overall success or failure.</p>
+<p>Let’s explore this home field advantage using a bar graph, with a horizontal line marking the <span class="math inline">\(50-50\)</span> cutoff.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> team_win_home,</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> Team,</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">y =</span> Wins<span class="sc">/</span>TotalGames)) <span class="sc">+</span></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"stack"</span>, <span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="fu">aes</span>(<span class="at">intercept =</span> <span class="fl">0.5</span>, <span class="at">slope =</span> <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> team_win_home,</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> Team,</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">y =</span> HomeWinGames<span class="sc">/</span>HomeGames)) <span class="sc">+</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"stack"</span>, <span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Team"</span>, <span class="at">y =</span> <span class="st">"probability of winning given at home"</span>,</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Home Field Win Analysis"</span>) <span class="sc">+</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="fu">aes</span>(<span class="at">intercept =</span> <span class="fl">0.5</span>, <span class="at">slope =</span> <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="proj_2_files/figure-html/win_to_total_ratio-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="proj_2_files/figure-html/win_given_home_barplot-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<ol start="4" type="1">
-<li></li>
-<li></li>
-<li></li>
-</ol>
+<p>The author admits this result surprises him, as he had expected all of the bars to exceed <span class="math inline">\(0.5\)</span>.</p>
 </section>
 </section>
 

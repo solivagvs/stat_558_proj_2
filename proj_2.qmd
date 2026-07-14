@@ -19,7 +19,8 @@ library(ggplot2)
 First we import the data, remove all rows containing missing values (which makes the `GameStatus` column redundant, as all scores were listed as `FINAL` or `NA`, so we will delete it). We will be analyzing scores by teams, so records where the home or away team are listed as `TBD` will also be expunged.
 
 ```{r data_import}
-football <- read_csv("data/2010-2025_scores.csv")
+football <- read_csv("data/2010-2025_scores.csv",
+                     show_col_types = FALSE)
 football <- drop_na(football)
 football <- football |> select(-GameStatus)
 football <- football |> filter(HomeTeam != "TBD" & AwayTeam != "TBD")
@@ -205,19 +206,16 @@ team_win_home <- data.frame(Team = as.character(home_counts[[1]]),
 team_win_home <- as_tibble(team_win_home)
 ```
 
-We might try to compare the overall number of wins by team. Las Vegas is a "new" team, from the Oakland team in 2020, and so its numbers aren't as "robust" as others. So instead we examine a win-to-total ratio and use a line at $y = 0.5$ as a metric for overall success or failure.
+Let's explore this home field advantage using a bar graph, with a horizontal line marking the $50-50$ cutoff.
 
-```{r win_to_total_ratio}
+```{r win_given_home_barplot}
 ggplot(data = team_win_home,
        mapping = aes(x = Team,
-                     y = c(Wins, TotalGames))) +
+                     y = HomeWinGames/HomeGames)) +
   geom_col(position = "stack", stat = "identity") +
+  labs(x = "Team", y = "probability of winning given at home",
+       title = "Home Field Win Analysis") +
   geom_abline(aes(intercept = 0.5, slope = 0))
 ```
 
-
-4. 
-
-5. 
-
-6. 
+The author admits this result surprises him, as he had expected all of the bars to exceed $0.5$.
