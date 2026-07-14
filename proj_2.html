@@ -161,7 +161,7 @@ window.Quarto = {
 <h1>Data Import and Cleaning</h1>
 <p>First we import the data, remove all rows containing missing values (which makes the <code>GameStatus</code> column redundant, as all scores were listed as <code>FINAL</code> or <code>NA</code>, so we will delete it). We will be analyzing scores by teams, so records where the home or away team are listed as <code>TBD</code> will also be expunged.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/2010-2025_scores.csv"</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"footballApp/data/2010-2025_scores.csv"</span>,</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> <span class="fu">drop_na</span>(football)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>football <span class="ot">&lt;-</span> football <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>GameStatus)</span>

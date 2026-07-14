@@ -1,5 +1,5 @@
 # loads in data and prepares it -----------------------------------------------
-football <- read_csv("../data/2010-2025_scores.csv",
+football <- read_csv("data/2010-2025_scores.csv",
                      show_col_types = FALSE)
 football <- drop_na(football)
 football <- football |> select(-GameStatus)

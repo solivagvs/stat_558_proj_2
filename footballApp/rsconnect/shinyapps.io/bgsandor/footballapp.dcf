@@ -1,0 +1,12 @@
+name: footballapp
+title:
+username: bgsandor
+account: bgsandor
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17608952
+bundleId: 12263736
+url: https://bgsandor.shinyapps.io/footballapp/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
